@@ -1,6 +1,8 @@
 import BestSelling from "@/components/pages/home/section/BestSelling";
 import Brands from "@/components/pages/home/section/Brands";
 import FlashSale from "@/components/pages/home/section/FlashSale";
+import NewArrival from "@/components/pages/home/section/NewArrival";
+import PopularProduct from "@/components/pages/home/section/PopularProduct";
 import PushProducts from "@/components/pages/home/section/PushProducts";
 import Slider from "@/components/pages/home/slider/Slider";
 
@@ -23,6 +25,8 @@ const HomePage = async () => {
             {/* <BrandAdv /> */}
             <BestSelling />
             {/* <OurBrands /> */}
+            <NewArrival />
+            <PopularProduct />
             <Brands />
         </div>
     );

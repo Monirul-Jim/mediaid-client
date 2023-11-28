@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 const ImageBanner = ({ item }) => {
 
     const [activeImage, setActiveImage] = useState(item.thumbnail)
-    console.log(item.thumbnail)
     useEffect(() => {
         setActiveImage(item.thumbnail)
     }, [item])

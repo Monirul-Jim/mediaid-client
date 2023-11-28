@@ -1,12 +1,71 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { GrMapLocation } from 'react-icons/gr'
-import PaymentMethod from './PaymentMethod'
+import 'react-toastify/dist/ReactToastify.css';
+import { toast } from "react-toastify";
+import axios from 'axios';
+import storage from '@/store/storage';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
+// import storage from ''
 function CheckoutModal() {
+    // const dispatch = useDispatch();
+    // const cartState = useSelector((state) => state.cart);
+    // useEffect(() => {
+    //     const storedCartState = storage.getItem('persist:root');
+    //     if (storedCartState) {
+    //         const parsedCartState = JSON.parse(storedCartState);
+    //         dispatch({ type: 'REHYDRATE', payload: { ...parsedCartState, _persist: { version: -1, rehydrated: true } } });
+    //     }
+    // }, [dispatch]);
+    const getItem = localStorage.getItem('persist:root');
+    const parseItem = JSON.parse(getItem)
+    console.log(parseItem);
+    const handleFormSubmit = async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const form = event.target;
+        const name = form.person_name.value;
+        const mobile = form.mobile_number.value;
+        const tran_id = form.tran_id.value;
+        const address = form.address.value;
+        const currentDate = new Date();
+        const formattedDate = `${currentDate.toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+        })} ${currentDate.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: 'numeric',
+        })}`;
+        const savedInfo = { name, mobile, tran_id, address, formattedDate }
+        if (window.my_modal_4.open) {
+            try {
+                const response = await axios.post('http://localhost:5000/user-order-collection', { savedInfo, parseItem });
+
+                if (response.status === 200) {
+                    toast.success('Product added successfully!', {
+                        position: toast.POSITION.TOP_RIGHT,
+                        autoClose: 3000,
+                        onClose: () => {
+                            window.my_modal_4.close();
+                        },
+                    });
+                } else {
+                    console.error('Unexpected response:', response);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+
+        }
+    }
+
     return (
         <dialog id="my_modal_4" className="modal">
-            <form method="dialog" className="modal-box">
-                <button className="btn btn-sm btn-circle btn-ghost absolute right-4 top-2">
+
+            <form onSubmit={handleFormSubmit} method="dialog" className="modal-box">
+                <button onClick={() => window.my_modal_4.close()} className="btn btn-sm btn-circle btn-ghost absolute right-4 top-2">
                     ✕
                 </button>
                 <div className="w-full">
@@ -40,71 +99,41 @@ function CheckoutModal() {
                         </div>
                         <p>৳ 360</p>
                     </div>
-                    <div className="my-4 px-1">
-                        <PaymentMethod
-                            title="Credit/Debit card & Mobile banking Payment"
-                            paymentIconLink="https://i.ibb.co/jkFXfsb/sslcz-verified.png"
-                            isOpen={"SSLCommerz"}>
-                            <p>
-                                Pay securely by Credit/Debit card, Internet banking or Mobile
-                                banking through SSLCommerz and get 10% discount on selective
-                                bank cards.
-                            </p>
-                        </PaymentMethod>
-                        <PaymentMethod
-                            title="Cash on delivery"
-                            paymentIconLink="https://i.ibb.co/pKrnkm6/cash-on-delivery-1.png"
-                            isOpen={"cashOnDelivery"}>
-                            <p>
-                                Pay with cash upon delivery. Need to pay 200 Taka in advance
-                                for Cash on Delivery outside Dhaka.
-                            </p>
-                        </PaymentMethod>
-                        {/* {paymentFieldData.map((item) => (
-                            <div key={item.id}>
-                                <PaymentMethod
-                                    title={item.name}
-                                    paymentIconLink={item.logoUrl}>
-                                    <div>
-                                        <p className="text-sm text-gray-600">
-                                            {item.paymentDescription}
-                                        </p>
-                                        <p className="mt-1 text-gray-900">
-                                            {item.paymentNumberTypeAndNumber}
-                                        </p>
-                                    </div>
-                                    <div className="flex justify-center mt-2">
-                                        <table className="w-full bg-teal-400 bg-opacity-40 shadow-md rounded-lg overflow-hidden">
-                                            <tbody>
-                                                <tr>
-                                                    <td className="py-2 px-2 border-b border-gray-200 text-base text-neutral-800 font-semibold">
-                                                        {item.name} Number
-                                                    </td>
-                                                    <td className="py-2 px-2 border-b border-gray-200">
-                                                        <input
-                                                            type="number"
-                                                            className="w-full py-1 px-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                                        />
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td className="py-2 px-2 border-b border-gray-200 text-base text-neutral-800 font-semibold">
-                                                        {item.name} Transaction ID
-                                                    </td>
-                                                    <td className="py-2 px-2">
-                                                        <input
-                                                            type="text"
-                                                            className="w-full py-1 px-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                                        />
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </PaymentMethod>
-                            </div>
-                        ))} */}
+
+
+                    <div className="relative">
+                        <label
+                            htmlFor="productName"
+                            className="block text-neutral-600 mb-1">
+                            Enter Your Name
+                        </label>
+                        <input name="person_name" type='text' className="w-full border-gray-300 border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg py-1 px-2" />
                     </div>
+                    <div className="relative">
+                        <label
+                            htmlFor="productName"
+                            className="block text-neutral-600 mb-1">
+                            Enter Your Mobile Number
+                        </label>
+                        <input name="mobile_number" type='number' className="w-full border-gray-300 border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg py-1 px-2" />
+                    </div>
+                    <div className="relative">
+                        <label
+                            htmlFor="productName"
+                            className="block text-neutral-600 mb-1">
+                            Enter Bkash/Nagad TransactionID
+                        </label>
+                        <input name="tran_id" type='text' className="w-full border-gray-300 border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg py-1 px-2" />
+                    </div>
+                    <div className="relative">
+                        <label
+                            htmlFor="productName"
+                            className="block text-neutral-600 mb-1">
+                            Address (please give details address)
+                        </label>
+                        <input name="address" type='text' className="w-full border-gray-300 border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg py-1 px-2" />
+                    </div>
+
                     <div className="w-[420px] p-2">
                         <p className="text-sm text-gray-600">
                             Your personal data will be used to process your order, support
@@ -128,10 +157,13 @@ function CheckoutModal() {
                                 *
                             </p>
                         </div>
-                        <p className="text-center cursor-pointer bg-[#101B7A] w-full font-bold text-white py-2 mt-3 rounded-sm">
-                            Place order
-                        </p>
                     </div>
+                    <button type="submit" className="text-center cursor-pointer bg-[#101B7A] w-full font-bold text-white py-2 mt-3 rounded-sm">
+                        Place order
+                    </button>
+                    <div className="my-4 px-1">
+                    </div>
+
                 </div>
             </form>
         </dialog>
@@ -139,3 +171,11 @@ function CheckoutModal() {
 }
 
 export default CheckoutModal
+
+
+// const data = {
+//     "cartState": "{\"cartItems\":[{\"_id\":\"6554b6c1df2c70b0a7b24f52\",\"title\":\"Sit deserunt ipsum\",\"price\":812,\"thumbnail\":\"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5eli8PIDmrcQtNvboZg_OAA8erV-UltGEuLsJi7Bw3AH14s4Jx0SqmDdp_jSZZCqOpqE&usqp=CAU\",\"stock\":\"10\",\"brand\":\"Deserunt qui esse es\",\"images\":[{\"url\":\"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5eli8PIDmrcQtNvboZg_OAA8erV-UltGEuLsJi7Bw3AH14s4Jx0SqmDdp_jSZZCqOpqE&usqp=CAU\"},{\"url\":\"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5eli8PIDmrcQtNvboZg_OAA8erV-UltGEuLsJi7Bw3AH14s4Jx0SqmDdp_jSZZCqOpqE&usqp=CAU\"},{\"url\":\"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5eli8PIDmrcQtNvboZg_OAA8erV-UltGEuLsJi7Bw3AH14s4Jx0SqmDdp_jSZZCqOpqE&usqp=CAU\"}],\"startDate\":\"2023-11-15\",\"endDate\":\"2023-11-17\",\"category\":\"Healthy_Food\",\"highlight\":[{\"high\":\"Eos sint labore vel \"},{\"high\":\"Eos sint labore vel \"}],\"subcategory\":\"Festival or fair\",\"typeOfSelling\":\"flash_sale\",\"description\":\"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum\",\"rating\":\"4.2\",\"status\":\"active\",\"tag\":[{\"tag\":\"Ut fuga Quis dolore\"},{\"tag\":\"Ut fuga Quis dolore\"}],\"discountPercent\":70,\"discountVip\":10,\"quantity\":1,\"totalPrice\":244}]}"
+// };
+// const parsedData = JSON.parse(data.cartState);
+// const cartItems = parsedData.cartItems;
+// console.log(cartItems);

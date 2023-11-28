@@ -1,12 +1,35 @@
 "use client"
-
 import FlashSellingProduct from "@/components/product/flashSale/FlashSellingProduct";
 import { useProduct } from "@/hooks/useProducts";
 import { Swiper, SwiperSlide } from "swiper/react";
 import SlideSection from "../../../loader/productLoader";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import useProductData from "@/hooks/useProductData";
 
 const FlashSale = () => {
-  const { isLoading, products } = useProduct("flash_sale")
+  // const { isLoading, products } = useProduct("flash_sale")
+  // const [products, setProducts] = useState([]);
+  // const [isLoading, setIsLoading] = useState(true)
+
+  // useEffect(() => {
+  //   const getProductData = async () => {
+  //     setIsLoading(true)
+  //     try {
+  //       const response = await axios.get('http://localhost:5000/get-product-admin');
+  //       setProducts(response.data);
+  //       setIsLoading(false)
+  //     } catch (error) {
+  //       console.error('Error fetching product data:', error);
+  //     }
+  //   };
+
+  //   getProductData();
+  // }, []);
+  const { products, isLoading } = useProductData();
+  const filteredProducts = products.filter(product => product.typeOfSelling === "flash_sale");
+
+
 
   return (
     <div className="px-1 my-8">
@@ -49,8 +72,8 @@ const FlashSale = () => {
                 <SlideSection />
               </SwiperSlide>
             )) :
-            products ?
-              products.map((item, i) => (
+            filteredProducts ?
+              filteredProducts.map((item, i) => (
                 <SwiperSlide key={i}>
                   <FlashSellingProduct item={item} />
                 </SwiperSlide>

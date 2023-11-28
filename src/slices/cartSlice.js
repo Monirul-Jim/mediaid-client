@@ -4,7 +4,6 @@ import { createSlice, current } from "@reduxjs/toolkit";
 var initialState = {
   cartItems: [],
 };
-
 const cartSlice = createSlice({
   name: "product",
   initialState,
@@ -23,7 +22,6 @@ const cartSlice = createSlice({
           quantity: 1,
           totalPrice: price,
         };
-
         return { cartItems: [...cartState.cartItems, data] };
       }
     },
@@ -88,7 +86,6 @@ const cartSlice = createSlice({
       const cartState = current(state);
       const { product } = payload;
       const quantity = parseInt(payload.quantity);
-
       const data = cartState.cartItems.find((item) => item._id === product._id);
       if (data && quantity > 0) {
         const price = discountCalculator(data.price, data.discountPercent);
@@ -107,6 +104,14 @@ const cartSlice = createSlice({
         return { cartItems: newCart };
       }
     },
+
+
+
+
+
+
+
+
   },
 });
 

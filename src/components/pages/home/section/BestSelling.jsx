@@ -1,11 +1,14 @@
 "use client"
 import ProductLoader from '@/components/loader/productLoader';
 import BestSellingProduct from "@/components/product/bestSale/BestSellingProduct";
+import useProductData from '@/hooks/useProductData';
 import { useProduct } from "@/hooks/useProducts";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 const BestSelling = () => {
-  const { isLoading, products } = useProduct("best_sale")
+  // const { isLoading, products } = useProduct("best_sale")
+  const { products, isLoading } = useProductData();
+  const filteredProducts = products.filter(product => product.typeOfSelling === "best_selling");
 
   return (
     <div className="px-1 mt-4">
@@ -40,8 +43,8 @@ const BestSelling = () => {
               <SwiperSlide key={i}>
                 <ProductLoader />
               </SwiperSlide>
-            )) : products ?
-              products.slice(0, 10).map((item, i) => (
+            )) : filteredProducts ?
+              filteredProducts.slice(0, 10).map((item, i) => (
                 <SwiperSlide key={i}>
                   <BestSellingProduct item={item} />
                 </SwiperSlide>
@@ -70,8 +73,8 @@ const BestSelling = () => {
               <SwiperSlide key={i}>
                 <ProductLoader />
               </SwiperSlide>
-            )) : products ?
-              products.slice(10, 20).map((item, i) => (
+            )) : filteredProducts ?
+              filteredProducts.slice(10, 20).map((item, i) => (
                 <SwiperSlide key={i}>
                   <BestSellingProduct item={item} />
                 </SwiperSlide>

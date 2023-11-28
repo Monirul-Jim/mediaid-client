@@ -17,7 +17,6 @@ async function Page({ searchParams }) {
     }
     const url = `/api/product?sku=${searchParams.product}`
     const product = await getProducts(url) // Get SSR product
-    // console.log(product)
 
     // check product 
     if (!product) {

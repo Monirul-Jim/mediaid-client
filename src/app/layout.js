@@ -6,6 +6,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import SessionProvider from "../provider/sessionProvider";
 import "./globals.css";
+import { ToastContainer } from "react-toastify";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,6 +24,7 @@ export default async function RootLayout({ children }) {
           <ReduxProvider>
             <SessionProvider>{children}</SessionProvider>
           </ReduxProvider>
+          <ToastContainer />
         </ContextProvider>
       </body>
     </html>

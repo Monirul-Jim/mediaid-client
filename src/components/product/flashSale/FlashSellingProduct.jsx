@@ -12,7 +12,7 @@ function FlashSellingProduct({ item }) {
     return (
         <div className=" shadow-sm">
             <Link
-                href={{ pathname: "/view", query: { product: item.sku } }}
+                href={`/dynamicproduct/${item?._id}`}
                 className="bg-white flex flex-col rounded-sm p-1">
                 <div className="overflow-hidden">
                     <Image

@@ -2,6 +2,7 @@
 import SearchProductLoader from "@/components/loader/searchProductLoader";
 import SearchedProduct from "@/components/product/search/searchedProduct";
 import { useCategories } from "@/hooks/useCategories";
+import useCategory from "@/hooks/useCategory";
 import { useSearch } from "@/hooks/useSearch";
 import { useEffect, useRef, useState } from "react";
 import { BiSolidDownArrow } from "react-icons/bi";
@@ -17,7 +18,8 @@ const SearchBar = () => {
     image: ""
   }
   const inputRef = useRef(null);
-  const { categories, isLoading } = useCategories()
+  // const { categories, isLoading } = useCategories()
+  const { categories, isLoading } = useCategory()
   const [selectedCategory, setSelectedCategory] = useState(defaultCategory)
   const [isSearchList, setIsSearchList] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
@@ -33,12 +35,26 @@ const SearchBar = () => {
     }
 
   }, [categories, isSearchList]);
-
-
   // Search handler 
   const [searchData, setSearchData] = useState("")
   const searchText = searchData.trim();
-  const { products, loading } = useSearch(searchText, selectedCategory._id) // Search Request handler
+  // const { products, loading } = useSearch(searchText, selectedCategory._id) // Search Request handler
+  const [products, setProducts] = useState([])
+  const [loading, setIsLoading] = useState(true)
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true)
+      try {
+        const response = await fetch(`http://localhost:5000/product-search-by-name?search=${searchText}`);
+        const data = await response.json();
+        setProducts(data);
+        setIsLoading(false)
+      } catch (error) {
+        console.error('Error fetching product data', error);
+      }
+    }
+    fetchData()
+  }, [searchText]);
   const isTabletOrMobile = useMediaQuery({ query: '(max-width: 666px)' })  // Responsive query 
 
 
@@ -82,7 +98,7 @@ const SearchBar = () => {
                         key={i}
                         className="cursor-pointer px-1 py-1 text-black hover:bg-[#60B8A6] hover:text-white capitalize text-sm"
                       >
-                        {list.name}
+                        {list.cate.name}
                       </li>
                     ))}
                   </ul>
@@ -96,7 +112,7 @@ const SearchBar = () => {
             className={`appearance-none bg-gray-100 text-gray-700 px-4 py-[7px] leading-tight outline-none focus:outline-none focus:bg-white grow w-full md:w-auto`}
             type="text"
             onChange={({ target }) => setSearchData(target.value)}
-            placeholder={categories && categories[placeholderIndex].name}
+            // placeholder={categories && categories[placeholderIndex].name}
             onFocus={() => setIsSearchList(true)}
           />
           <div className="px-3 py-2 cursor-pointer bg-[#60B8A6] text-white rounded-r-md">

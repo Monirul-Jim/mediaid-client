@@ -10,7 +10,6 @@ const SubNav = () => {
             <div className="col-start-1 col-end-3">
                 <CategoryButton />
             </div>
-
             <div className="col-start-3 col-end-13 flex w-full justify-between">
                 <div className="flex items-center gap-7">
                     <Link href="/dashboard">

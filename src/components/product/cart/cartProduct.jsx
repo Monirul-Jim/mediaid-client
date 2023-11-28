@@ -2,12 +2,13 @@ import { inputQuantityHandler, removeFromCart } from "@/slices/cartSlice"
 import { discountCalculator } from "@/utils/generator"
 import Image from "next/image"
 import { useDispatch, useSelector } from "react-redux"
-
+import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai"
 function CartProduct({ item }) {
     const discountPrice = discountCalculator(item.price, item.discountPercent)
     const dispatch = useDispatch()
     const { cartItems } = useSelector(s => s.cartState)
-    const findItem = cartItems.find(x => x._id === item._id)
+    const findItem = cartItems.find(x => x._id === item._id);
+
 
     // Input Quantity handler
     function quantityHandler(quantity) {
@@ -51,13 +52,19 @@ function CartProduct({ item }) {
                             }
                             <span className="ml-4 text-teal-600">৳{discountPrice}</span>
                         </p>
-                        <select value={findItem.quantity} onChange={({ target }) => quantityHandler(target.value)} className="px-2 border w-full py-[2px] rounded-md cursor-pointer hover:border-teal-500 duration-300">
+                        {/* <select value={findItem.quantity} onChange={({ target }) => quantityHandler(target.value)} className="px-2 border w-full py-[2px] rounded-md cursor-pointer hover:border-teal-500 duration-300">
                             {
                                 [...Array(10).keys()].map((x, i) => (
                                     <option key={i + 1} value={i + 1}>{i + 1}</option>
                                 ))
                             }
-                        </select>
+                        </select> */}
+
+
+
+
+
+
                     </div>
                 </div>
             </div>
