@@ -9,7 +9,7 @@ function SearchedProduct({ item, setIsSearchList }) {
         <div
             className="flex p-1 border-b rounded  items-center justify-between hover:bg-gray-100 cursor-pointer"
         >
-            <Link onClick={() => setIsSearchList(false)} href={{ pathname: "/view", query: { product: item.sku } }} className="flex w-full items-center gap-2">
+            <Link onClick={() => setIsSearchList(false)} href={`/dynamicproduct/${item?._id}`} className="flex w-full items-center gap-2">
                 <Image
                     src={item.thumbnail}
                     alt="image"
