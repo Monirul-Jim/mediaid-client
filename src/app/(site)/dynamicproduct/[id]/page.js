@@ -8,11 +8,11 @@ const DynamicProductShow = ({ params }) => {
     const [activeImages, setActiveImages] = useState([productDetails?.thumbnail]);
 
 
-    // http://localhost:5000/get-product-admin/65536412c3fff625e53f55fa
+    // https://mediaaid-server.vercel.app/get-product-admin/65536412c3fff625e53f55fa
     useEffect(() => {
         const getProductData = async () => {
             try {
-                const response = await axios.get(`http://localhost:5000/get-product-admin/${params.id}`);
+                const response = await axios.get(`https://mediaaid-server.vercel.app/get-product-admin/${params.id}`);
                 setProductDetails(response.data);
             } catch (error) {
                 console.error('Error fetching product data:', error);

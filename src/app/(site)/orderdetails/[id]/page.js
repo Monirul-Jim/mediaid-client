@@ -7,7 +7,7 @@ const DynamicSingleIdProduct = ({ params }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/user-order-collection/${params.id}`);
+                const response = await fetch(`https://mediaaid-server.vercel.app/user-order-collection/${params.id}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch product data');
                 }

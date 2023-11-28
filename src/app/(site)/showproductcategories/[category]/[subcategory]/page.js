@@ -12,7 +12,7 @@ const ShowProductCategories = ({ params }) => {
         const fetchData = async () => {
             setIsLoading(true)
             try {
-                const response = await fetch(`http://localhost:5000/get-products-by-subcategory/${params.subcategory}`);
+                const response = await fetch(`https://mediaaid-server.vercel.app/get-products-by-subcategory/${params.subcategory}`);
                 const data = await response.json();
                 setProductData(data);
                 setIsLoading(false)

@@ -16,7 +16,7 @@ const FlashSale = () => {
   //   const getProductData = async () => {
   //     setIsLoading(true)
   //     try {
-  //       const response = await axios.get('http://localhost:5000/get-product-admin');
+  //       const response = await axios.get('https://mediaaid-server.vercel.app/get-product-admin');
   //       setProducts(response.data);
   //       setIsLoading(false)
   //     } catch (error) {

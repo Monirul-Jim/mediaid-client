@@ -45,7 +45,7 @@ const SearchBar = () => {
     const fetchData = async () => {
       setIsLoading(true)
       try {
-        const response = await fetch(`http://localhost:5000/product-search-by-name?search=${searchText}`);
+        const response = await fetch(`https://mediaaid-server.vercel.app/product-search-by-name?search=${searchText}`);
         const data = await response.json();
         setProducts(data);
         setIsLoading(false)

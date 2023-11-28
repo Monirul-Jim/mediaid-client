@@ -41,7 +41,7 @@ function CheckoutModal() {
         const savedInfo = { name, mobile, tran_id, address, formattedDate }
         if (window.my_modal_4.open) {
             try {
-                const response = await axios.post('http://localhost:5000/user-order-collection', { savedInfo, parseItem });
+                const response = await axios.post('https://mediaaid-server.vercel.app/user-order-collection', { savedInfo, parseItem });
 
                 if (response.status === 200) {
                     toast.success('Product added successfully!', {
