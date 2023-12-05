@@ -4,9 +4,10 @@ import { GrMapLocation } from 'react-icons/gr'
 import 'react-toastify/dist/ReactToastify.css';
 import { toast } from "react-toastify";
 import axios from 'axios';
-import storage from '@/store/storage';
-import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
+import { ToggleContext } from "@/provider/contextProvider";
+import { discountCalculator } from "@/utils/generator";
+import { useContext, useEffect, useState } from "react";
+import { useSelector } from 'react-redux';
 // import storage from ''
 function CheckoutModal() {
     // const dispatch = useDispatch();
@@ -18,17 +19,120 @@ function CheckoutModal() {
     //         dispatch({ type: 'REHYDRATE', payload: { ...parsedCartState, _persist: { version: -1, rehydrated: true } } });
     //     }
     // }, [dispatch]);
+    const [paymentMethod, setPaymentMethod] = useState('');
+    const [deliveryLocation, setDeliveryLocation] = useState('');
+    const { data, setData } = useContext(ToggleContext)
+    const { cartItems } = useSelector(s => s.cartState)
+    const [totalAmount, setTotalAmount] = useState(0);
+    const [extraCost, setExtraCost] = useState(0);
     const getItem = localStorage.getItem('persist:root');
     const parseItem = JSON.parse(getItem)
-    console.log(parseItem);
+    const [userSelection, setUserSelection] = useState(null);
+    const [inputValue, setInputValue] = useState('');
+    const [inputError, setInputError] = useState('');
+    // useEffect(() => {
+    //     let prices = cartItems.reduce((sum, item) => {
+    //         return sum + discountCalculator(item.price, item.discountPercent) * item.quantity;
+    //     }, 0);
+    //     let additionalCharge = 0;
+    //     if (paymentMethod === 'bkash') {
+    //         additionalCharge = Math.ceil(prices / 1000) * 19;
+    //     } else if (paymentMethod === 'nagad') {
+    //         additionalCharge = Math.ceil(prices / 1000) * 14;
+    //     }
+    //     const total = prices + additionalCharge;
+    //     setTotalAmount(total);
+    // }, [paymentMethod, cartItems]);
+
+    const handleSelection = (selection) => {
+        setUserSelection(selection);
+
+        // If the user selects "No", clear the input field and reset the extra cost
+        if (selection === 'No') {
+            setInputValue('');
+            setExtraCost(0);
+        }
+
+        // If the user selects "Yes", add an extra 200 tk to totalAmount
+        if (selection === 'Yes') {
+            setExtraCost(200);
+        }
+    };
+
+
+    const handleInputChange = (e) => {
+        const inputValueWithoutSymbols = e.target.value.replace(/[^A-Za-z]/g, '');
+
+        // Check for invalid characters
+        if (!/^[A-Za-z]+$/.test(inputValueWithoutSymbols)) {
+            setInputError('Invalid characters. Please enter only letters.');
+        } else {
+            setInputError('');
+        }
+
+        setInputValue(inputValueWithoutSymbols);
+    };
+    // useEffect(() => {
+    //     let prices = cartItems.reduce((sum, item) => {
+    //         return sum + discountCalculator(item.price, item.discountPercent) * item.quantity;
+    //     }, 0);
+    //     let additionalCharge = 0;
+    //     if (paymentMethod === 'bkash') {
+    //         additionalCharge = Math.ceil(prices / 1000) * 19;
+    //     } else if (paymentMethod === 'nagad') {
+    //         additionalCharge = Math.ceil(prices / 1000) * 14;
+    //     }
+
+    //     let deliveryCharge = 0;
+    //     if (deliveryLocation === 'inside_dhaka') {
+    //         deliveryCharge = 60;
+    //     } else if (deliveryLocation === 'outside_dhaka') {
+    //         deliveryCharge = 100;
+    //     }
+
+    //     const total = prices + additionalCharge + deliveryCharge;
+    //     setTotalAmount(total);
+    // }, [paymentMethod, deliveryLocation, cartItems]);
+    useEffect(() => {
+        let prices = cartItems.reduce((sum, item) => {
+            return sum + discountCalculator(item.price, item.discountPercent) * item.quantity;
+        }, 0);
+        let additionalCharge = 0;
+        if (paymentMethod === 'bkash') {
+            additionalCharge = Math.ceil(prices / 1000) * 19;
+        } else if (paymentMethod === 'nagad') {
+            additionalCharge = Math.ceil(prices / 1000) * 14;
+        }
+
+        let deliveryCharge = 0;
+        if (deliveryLocation === 'inside_dhaka') {
+            deliveryCharge = 60;
+        } else if (deliveryLocation === 'outside_dhaka') {
+            deliveryCharge = 100;
+        }
+
+        const total = prices + additionalCharge + deliveryCharge + extraCost;
+        setTotalAmount(total);
+    }, [paymentMethod, deliveryLocation, cartItems, extraCost]);
+
+
+
+
     const handleFormSubmit = async (event) => {
         event.preventDefault();
         event.stopPropagation();
         const form = event.target;
         const name = form.person_name.value;
         const mobile = form.mobile_number.value;
-        const tran_id = form.tran_id.value;
+        const tran_id = form.tran_id?.value;
+        // const paymentMethod = form.paymentMethod.value;
         const address = form.address.value;
+        // const insideDhaka = form.insideDhaka.value;
+        // const outsideDhaka = form.outsideDhaka.value;
+        const yesButton = form.yesButton.value;
+        const noButton = form.noButton.value;
+        const user_name_product = inputValue;
+        const amount = form.amount.value;
         const currentDate = new Date();
         const formattedDate = `${currentDate.toLocaleDateString('en-US', {
             month: 'long',
@@ -38,11 +142,14 @@ function CheckoutModal() {
             hour: 'numeric',
             minute: 'numeric',
         })}`;
-        const savedInfo = { name, mobile, tran_id, address, formattedDate }
+        const savedInfo = {
+            name, tran_id, mobile, address, formattedDate, paymentMethod, deliveryLocation, yesButton, totalAmount, noButton, user_name_product, amount,
+        };
+
+        console.log(savedInfo);
         if (window.my_modal_4.open) {
             try {
                 const response = await axios.post('https://mediaaid-server.vercel.app/user-order-collection', { savedInfo, parseItem });
-
                 if (response.status === 200) {
                     toast.success('Product added successfully!', {
                         position: toast.POSITION.TOP_RIGHT,
@@ -60,6 +167,7 @@ function CheckoutModal() {
 
         }
     }
+
 
     return (
         <dialog id="my_modal_4" className="modal">
@@ -97,41 +205,179 @@ function CheckoutModal() {
                             />
                             <p>To be paid</p>
                         </div>
-                        <p>৳ 360</p>
+                        <p>৳ {totalAmount}</p>
+                    </div>
+                    <div className="flex items-center mt-2 mb-2">
+                        <input
+                            type="radio"
+                            name="insideDhaka"
+                            id="insideDhaka"
+                            value="inside_dhaka"
+                            onChange={() => setDeliveryLocation('inside_dhaka')}
+                            className="form-radio text-indigo-600 space-x-2 h-5 w-5"
+                        />
+                        <label htmlFor="insideDhaka" className="ml-2 text-gray-700">Inside Dhaka (60 TK)</label>
+                        <input
+                            type="radio"
+                            name="outsideDhaka"
+                            id="outsideDhaka"
+                            value="outside_dhaka"
+                            onChange={() => setDeliveryLocation('outside_dhaka')}
+                            className="form-radio text-indigo-600 h-5 w-5"
+                        />
+                        <label htmlFor="outsideDhaka" className="ml-2 text-gray-700">Outside Dhaka (100 Tk)</label>
                     </div>
 
+                    <div className='gap-4'>
+                        <h1 className='font-semibold mt-2 mb-2'>Payment Method (Please Select A Method)</h1>
+                        <div>
+                            <input
+                                type="radio"
+                                name="cashOnDelivery"
+                                id="cashOnDelivery"
+                                value="cashOnDelivery"
+                                onChange={() => setPaymentMethod('cashOnDelivery')}
+                            />
+                            <label htmlFor="cashOnDelivery">Cash On Delivery</label>
+                        </div>
+                        <div>
+                            <input
+                                type="radio"
+                                name="bkash"
+                                id="bkash"
+                                value="bkash"
+                                onChange={() => setPaymentMethod('bkash')}
+                            />
+                            <label htmlFor="bkash">Bkash</label>
+                        </div>
+                        <div>
+                            <input
+                                type="radio"
+                                name="nagad"
+                                id="nagad"
+                                value="nagad"
+                                onChange={() => setPaymentMethod('nagad')}
+                            />
+                            <label htmlFor="nagad">Nagad</label>
+                        </div>
+                        <div>
+                            <p> If You want to add you name in product   <span className={`mt-4 text-red-600 ${userSelection !== 'Yes' ? 'hidden' : ''}`}>Extraa Cost: 200 tk </span></p>
+                            <div>
+                                <div>
+                                    <label className="mr-4">
+                                        <input
+                                            type="radio"
+                                            name="yesButton"
+                                            value="Yes"
+                                            checked={userSelection === 'Yes'}
+                                            onChange={() => handleSelection('Yes')}
+                                            className="mr-2"
+                                        />
+                                        Yes
+                                    </label>
+                                    <label>
+                                        <input
+                                            type="radio"
+                                            name="noButton"
+                                            value="No"
+                                            checked={userSelection === 'No'}
+                                            onChange={() => handleSelection('No')}
+                                            className="mr-2"
+                                        />
+                                        No
+                                    </label>
+                                </div>
+                                {userSelection === 'Yes' && (
+                                    <div>
+                                        <label className="block mt-4">
+                                            <p> Please enter only letters.</p>
+                                            <input
+                                                type="text"
+                                                name='user_name_product'
+                                                value={inputValue}
+                                                placeholder='Enter Your Name'
+                                                onChange={handleInputChange}
+                                                className={`border ${inputError ? 'border-red-500' : 'border-gray-300'} p-2 rounded mt-1`}
+                                            />
+                                        </label>
+                                        {inputError && <p className="text-red-500">{inputError}</p>}
+                                    </div>
 
-                    <div className="relative">
-                        <label
-                            htmlFor="productName"
-                            className="block text-neutral-600 mb-1">
-                            Enter Your Name
-                        </label>
-                        <input name="person_name" type='text' className="w-full border-gray-300 border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg py-1 px-2" />
-                    </div>
-                    <div className="relative">
-                        <label
-                            htmlFor="productName"
-                            className="block text-neutral-600 mb-1">
-                            Enter Your Mobile Number
-                        </label>
-                        <input name="mobile_number" type='number' className="w-full border-gray-300 border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg py-1 px-2" />
-                    </div>
-                    <div className="relative">
-                        <label
-                            htmlFor="productName"
-                            className="block text-neutral-600 mb-1">
-                            Enter Bkash/Nagad TransactionID
-                        </label>
-                        <input name="tran_id" type='text' className="w-full border-gray-300 border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg py-1 px-2" />
-                    </div>
-                    <div className="relative">
-                        <label
-                            htmlFor="productName"
-                            className="block text-neutral-600 mb-1">
-                            Address (please give details address)
-                        </label>
-                        <input name="address" type='text' className="w-full border-gray-300 border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg py-1 px-2" />
+                                )}
+                                <div className="mt-4">
+                                    <p>Selected: {userSelection}</p>
+                                    {userSelection === 'Yes' && <p>Input Value: {inputValue}</p>}
+                                </div>
+                            </div>
+                        </div>
+                        <>
+                            <h1 className='font-semibold mt-2 mb-2'>Additional Information <span className='text-red-500'>(required*)</span></h1>
+                            <div className="relative">
+                                <label htmlFor="productName" className="block text-neutral-600 mb-1">
+                                    Enter Your Name
+                                </label>
+                                <input
+                                    name="person_name"
+                                    type='text'
+                                    className="w-full border-gray-300 border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg py-1 px-2"
+                                />
+                            </div>
+                            <div className={`relative mt-4 ${userSelection !== 'Yes' ? 'hidden' : ''}`}>
+                                <label htmlFor="personName" className="block text-neutral-600 mb-1">
+                                    Your Product Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={inputValue}
+                                    onChange={(e) => setInputValue(e.target.value)}
+                                    className="w-full border-gray-300 border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg py-1 px-2"
+                                />
+                            </div>
+                            <div className="relative">
+                                <label htmlFor="productName" className="block text-neutral-600 mb-1">
+                                    Enter The Amount You Pay
+                                </label>
+                                <input
+                                    name="amount"
+                                    type='number'
+                                    className="w-full border-gray-300 border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg py-1 px-2"
+                                />
+                            </div>
+                            <div className="relative">
+                                <label htmlFor="productName" className="block text-neutral-600 mb-1">
+                                    Enter Your Mobile Number
+                                </label>
+                                <input
+                                    name="mobile_number"
+                                    type='number'
+                                    className="w-full border-gray-300 border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg py-1 px-2"
+                                />
+                            </div>
+
+                            {(paymentMethod === 'bkash' || paymentMethod === 'nagad') && (
+                                <div className="relative">
+                                    <label htmlFor="productName" className="block text-neutral-600 mb-1">
+                                        Enter {paymentMethod === 'bkash' ? 'Bkash' : 'Nagad'} TransactionID
+                                    </label>
+                                    <input
+                                        name="tran_id"
+                                        type='text'
+                                        className="w-full border-gray-300 border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg py-1 px-2"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="relative">
+                                <label htmlFor="productName" className="block text-neutral-600 mb-1">
+                                    Address (please give details address)
+                                </label>
+                                <input
+                                    name="address"
+                                    type='text'
+                                    className="w-full border-gray-300 border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg py-1 px-2"
+                                />
+                            </div>
+                        </>
                     </div>
 
                     <div className="w-[420px] p-2">
@@ -171,11 +417,3 @@ function CheckoutModal() {
 }
 
 export default CheckoutModal
-
-
-// const data = {
-//     "cartState": "{\"cartItems\":[{\"_id\":\"6554b6c1df2c70b0a7b24f52\",\"title\":\"Sit deserunt ipsum\",\"price\":812,\"thumbnail\":\"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5eli8PIDmrcQtNvboZg_OAA8erV-UltGEuLsJi7Bw3AH14s4Jx0SqmDdp_jSZZCqOpqE&usqp=CAU\",\"stock\":\"10\",\"brand\":\"Deserunt qui esse es\",\"images\":[{\"url\":\"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5eli8PIDmrcQtNvboZg_OAA8erV-UltGEuLsJi7Bw3AH14s4Jx0SqmDdp_jSZZCqOpqE&usqp=CAU\"},{\"url\":\"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5eli8PIDmrcQtNvboZg_OAA8erV-UltGEuLsJi7Bw3AH14s4Jx0SqmDdp_jSZZCqOpqE&usqp=CAU\"},{\"url\":\"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5eli8PIDmrcQtNvboZg_OAA8erV-UltGEuLsJi7Bw3AH14s4Jx0SqmDdp_jSZZCqOpqE&usqp=CAU\"}],\"startDate\":\"2023-11-15\",\"endDate\":\"2023-11-17\",\"category\":\"Healthy_Food\",\"highlight\":[{\"high\":\"Eos sint labore vel \"},{\"high\":\"Eos sint labore vel \"}],\"subcategory\":\"Festival or fair\",\"typeOfSelling\":\"flash_sale\",\"description\":\"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum\",\"rating\":\"4.2\",\"status\":\"active\",\"tag\":[{\"tag\":\"Ut fuga Quis dolore\"},{\"tag\":\"Ut fuga Quis dolore\"}],\"discountPercent\":70,\"discountVip\":10,\"quantity\":1,\"totalPrice\":244}]}"
-// };
-// const parsedData = JSON.parse(data.cartState);
-// const cartItems = parsedData.cartItems;
-// console.log(cartItems);

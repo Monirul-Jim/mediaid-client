@@ -15,7 +15,7 @@ const AbsoluteCartDetails = () => {
   const { cartItems } = useSelector(s => s.cartState)
 
   // Total bills calculator
-  var prices = cartItems.reduce((sum, i) => {
+  let prices = cartItems.reduce((sum, i) => {
     return sum + (discountCalculator(
       i.price,
       i.discountPercent
@@ -24,7 +24,7 @@ const AbsoluteCartDetails = () => {
 
   if (data.openCart) {
     return (
-      <div className="animate-popup origin-right h-[80vh] transition-all bg-white w-[360px] shadow-2xl duration-500 rounded-sm overflow-y-scroll">
+      <div className="animate-popuporigin-right h-[80vh] transition-all bg-white w-[360px] shadow-2xl duration-500 rounded-sm overflow-y-scroll">
         <div className="flex items-center justify-between p-1 bg-teal-700 text-white rounded-t-sm">
           <p className="text-xs">
             Free delivery above $999 order (outside Dhaka){" "}

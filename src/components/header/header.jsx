@@ -6,7 +6,10 @@ import LoginButton from "./button/loginButton";
 import UserInfo from "./logedInfo/userInfo";
 import LoginModal from "./login/loginModal";
 import SearchBar from "./search/SearchBar";
+import DarkLight from "../dark/darkLight";
 const Header = () => {
+    // Added Dark Mode
+
 
     return (
         <div className="flex pt-2 pb-4 items-end justify-between gap-4 bg-base-100 lg:px-10">
@@ -30,13 +33,14 @@ const Header = () => {
             </div>
             <div className="col-span-3 flex gap-4 justify-center items-center">
                 <LoginButton />
-                <Link
+                <DarkLight />
+                {/* <Link
                     href=""
                     className=" cursor-pointer hover:outline rounded-sm outline-teal-400 p-[2px] ">
                     <p className="font-semibold text-sm text-slate-600">Returns</p>
 
                     <p className="font-bold text-base text-teal-500">& Orders</p>
-                </Link>
+                </Link> */}
                 <CartButton />
             </div>
             <LoginModal />

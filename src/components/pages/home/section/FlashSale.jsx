@@ -8,29 +8,31 @@ import axios from "axios";
 import useProductData from "@/hooks/useProductData";
 
 const FlashSale = () => {
-  // const { isLoading, products } = useProduct("flash_sale")
-  // const [products, setProducts] = useState([]);
-  // const [isLoading, setIsLoading] = useState(true)
-
-  // useEffect(() => {
-  //   const getProductData = async () => {
-  //     setIsLoading(true)
-  //     try {
-  //       const response = await axios.get('https://mediaaid-server.vercel.app/get-product-admin');
-  //       setProducts(response.data);
-  //       setIsLoading(false)
-  //     } catch (error) {
-  //       console.error('Error fetching product data:', error);
-  //     }
-  //   };
-
-  //   getProductData();
-  // }, []);
   const { products, isLoading } = useProductData();
   const filteredProducts = products.filter(product => product.typeOfSelling === "flash_sale");
+  const calculateRemainingTime = (endDate) => {
+    const now = new Date();
+    const endDateTime = new Date(endDate);
+    const timeDifference = endDateTime - now;
+    const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
 
+    return {
+      days: days < 10 ? "0" + days : days,
+      hours: hours < 10 ? "0" + hours : hours,
+      minutes: minutes < 10 ? "0" + minutes : minutes,
+    };
+  };
+  const [remainingTime, setRemainingTime] = useState(calculateRemainingTime(filteredProducts[0]?.endDate));
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setRemainingTime(calculateRemainingTime(filteredProducts[0]?.endDate));
+    }, 1000);
 
+    return () => clearInterval(intervalId);
+  }, [filteredProducts]);
   return (
     <div className="px-1 my-8">
       <div className="flex items-end justify-between">
@@ -39,12 +41,11 @@ const FlashSale = () => {
             Flash <span className="text-[#FD3851]">Sale</span>
           </h4>
           <div className="flex items-end text-center gap-1 font-mono text-lg font-bold text-yellow-500 cursor-pointer">
-            {/* <p>{time.days < 10 ? "0" + time.days : time.days}</p> <span>:</span>
-            <p>{time.hours < 10 ? "0" + time.hours : time.hours}</p>{" "}
+            <p>{remainingTime.days} days</p>
             <span>:</span>
-            <p>{time.minutes < 10 ? "0" + time.minutes : time.minutes}</p>{" "}
+            <p>{remainingTime.hours} hours</p>
             <span>:</span>
-            <p>{time.seconds < 10 ? "0" + time.seconds : time.seconds}</p> */}
+            <p>{remainingTime.minutes} minutes</p>
           </div>
         </div>
         <p className="text-sm tracking-wide mr-1">View All</p>

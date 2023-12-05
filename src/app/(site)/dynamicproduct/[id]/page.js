@@ -2,13 +2,13 @@
 import axios from 'axios';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
+import { addToCart, decrementQuantity, incrementQuantity } from "@/slices/cartSlice"
+import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai"
+import { useDispatch, useSelector } from "react-redux"
 
 const DynamicProductShow = ({ params }) => {
     const [productDetails, setProductDetails] = useState([])
     const [activeImages, setActiveImages] = useState([productDetails?.thumbnail]);
-
-
-    // https://mediaaid-server.vercel.app/get-product-admin/65536412c3fff625e53f55fa
     useEffect(() => {
         const getProductData = async () => {
             try {
@@ -24,6 +24,9 @@ const DynamicProductShow = ({ params }) => {
     useEffect(() => {
         setActiveImages([productDetails?.thumbnail]);
     }, [productDetails]);
+    const dispatch = useDispatch()
+    const { cartItems } = useSelector(state => state.cartState)
+    const existInCart = cartItems.find(x => x._id === productDetails._id)
     return (
         <div>
             <div className='flex flex-col md:flex-row gap-6'>
@@ -65,11 +68,39 @@ const DynamicProductShow = ({ params }) => {
                                 </div>
                             ))}
                         </div>
+                        <>
+                            {
+                                existInCart ?
+                                    <div className="flex justify-between px-1 mt-4">
+                                        <div >
+                                            <span className="text-sm">Quantity: </span>
+                                        </div>
+                                        <div className="flex justify-center gap-2 items-center">
+                                            <button
+                                                onClick={() => dispatch(decrementQuantity(productDetails))}
+                                                className="border text-sm px-2 py-1 hover:bg-gray-200 transition">
+                                                <AiOutlineMinus />
+                                            </button>
+                                            <span >{existInCart.quantity}</span>
+                                            <button
+                                                onClick={() => dispatch(incrementQuantity(productDetails))}
+                                                className="border text-sm px-2 py-1 hover:bg-gray-200 transition">
+                                                <AiOutlinePlus />
+                                            </button>
+                                        </div>
+                                    </div > :
+                                    <div className="px-1">
+                                        <button
+                                            onClick={() => dispatch(addToCart(productDetails))}
+                                            className="uppercase text-xs border w-full py-2 font-sans bg-yellow-300 hover:bg-yellow-500 transition border-yellow-300 text-neutral-800 ">
+                                            Add to cart
+                                        </button>
+                                    </div>
+                            }
+
+                        </>
                     </div>
-
                 </div>
-
-
                 <div className="border  md:mx-auto mx-2 md:my-3  mb-4  px-6 py-4 w-full">
                     <div className="border h-fit p-2 mt-3 md:p-5 mx-2 md:mx-0">
                         <p className="font-semibold text-sm md:text-base">Highlight:</p>
